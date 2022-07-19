@@ -48,6 +48,7 @@ class UI {
     this.balance.classList.add('showBlack')
   }
   }
+
   submitExpanceForm(){
     const expenseValue  = this.expenseInput.value
     const amountValue = this.amountInput.value
@@ -71,42 +72,79 @@ class UI {
       }
       this.itemID++
       this.itemList.push(expense)
-      this.addExpance(expense)
+      this.addExpense(expense)
       this.showBalance()
     }
   }
-  addExpance(expense){
-    const div = document.createElement('div')
-    div.classList.add('expense')
-    div.innerHTML =`<div class="expense-item d-flex justify-content-between align-items-baseline">
-
-    <h6 class="expense-title mb-0 text-uppercase list-item">- $${expense.amount}</h6>
-    <h5 class="expense-amount mb-0 list-item">${expense.amount}</h5>
-
-    <div class="expense-icons list-item">
-
-     <a href="#" class="edit-icon mx-2" data-id="${expense.id}">
-      <i class="fas fa-edit"></i>
-     </a>
-     <a href="#" class="delete-icon" data-id="${expense.id}">
-      <i class="fas fa-trash"></i>
-     </a>
-    </div>
-   </div>`
-   this.expenseList.append(div)
+  addExpense(expense) {
+    const div = document.createElement("div");
+    div.classList.add("expense");
+    div.innerHTML = `<div class="expense-item d-flex justify-content-between align-items-baseline">
+       <h6 class="expense-title mb-0 text-uppercase list-item">- ${
+         expense.title
+       }</h6>
+       <h5 class="expense-amount mb-0 list-item">${expense.amount}</h5>
+       <!-- icons -->
+      <div class="expense-icons list-item">
+          <a href="#" class="edit-icon mx-2" data-id="${expense.id}">
+           <i class="fas fa-edit"></i>
+          </a>
+          <a href="#" class="delete-icon" data-id="${expense.id}">
+           <i class="fas fa-trash"></i>
+          </a>
+         </div>
+      </div>
+   `;
+    this.expenseList.appendChild(div);
   }
   totalexpense(){
     let total = 0
     if(this.itemList.length>0){
       total = this.itemList.reduce((value,current)=>{
-        console.log(value);
-        console.log(current.amount);
+        // console.log(value);
+        // console.log(current.amount);
         return value+=current.amount
 
       },0)
     }
     this.expenseAmount.textContent=total
     return total
+  }
+  editExpense(element) {
+    let id = parseInt(element.dataset.id);
+
+    let parent = element.parentElement.parentElement.parentElement;
+    // remove from dom
+    this.expenseList.removeChild(parent);
+    //remove from list;
+    let expense = this.itemList.filter(function(item) {
+      return item.id === id;
+    });
+
+    // show value
+    this.expenseInput.value = expense[0].title;
+    this.amountInput.value = expense[0].amount;
+    // delete item
+    let tempList = this.itemList.filter(function(expense) {
+      return expense.id !== id;
+    });
+
+    this.itemList = tempList;
+    this.showBalance();
+  }
+  deleteExpense(element){
+    let id = parseInt(element.dataset.id);
+
+    let parent = element.parentElement.parentElement.parentElement;
+    // remove from dom
+    this.expenseList.removeChild(parent);
+    //remove from list;
+    let tempList = this.itemList.filter(function(expense) {
+      return expense.id !== id;
+    });
+    
+    this.itemList = tempList;
+    this.showBalance();
   }
   
 }
@@ -128,9 +166,23 @@ const eventListeners=()=>{
     ui.submitExpanceForm()
    })
 
-   expenseList.addEventListener('click',()=>{
-
+   expenseList.addEventListener('click',(e)=>{
+    if(e.target.parentElement.classList.contains('edit-icon')){
+      ui.editExpense(e.target.parentElement)
+    }
+    else if (e.target.parentElement.classList.contains('delete-icon')){
+      ui.deleteExpense(e.target.parentElement)
+    }
+    
    })
 }
 
 document.addEventListener('DOMContentLoaded',eventListeners)
+
+// expenseList.addEventListener("click", function() {
+//   if (event.target.parentElement.classList.contains("edit-icon")) {
+//     ui.editExpense(event.target.parentElement);
+//   } else if (event.target.parentElement.classList.contains("delete-icon")) {
+//     ui.deleteExpense(event.target.parentElement);
+//   }
+// });
